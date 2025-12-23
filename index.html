@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Asistencias - Facultad de Economía</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-presente {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-ausente {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-tardanza {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-justificado {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .export-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .export-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Sistema de Asistencias</h1>
+            <p>Facultad de Economía - Universidad</p>
+        </div>
+        
+        <div class="content">
+            <div class="alert" id="alert"></div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('registro')">Registrar Asistencia</button>
+                <button class="tab" onclick="switchTab('profesores')">Gestión de Profesores</button>
+                <button class="tab" onclick="switchTab('consulta')">Consultar Asistencias</button>
+                <button class="tab" onclick="switchTab('powerbi')">Exportar para Power BI</button>
+            </div>
+            
+            <!-- TAB: Registro de Asistencia -->
+            <div id="tab-registro" class="tab-content active">
+                <h2>Registrar Asistencia del Día</h2>
+                <form id="formAsistencia">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Carrera</label>
+                            <select id="carreraFiltro" onchange="cargarProfesores()">
+                                <option value="">Todas las carreras</option>
+                                <option value="1">Gestión Empresarial</option>
+                                <option value="2">Estadística e Informática</option>
+                                <option value="3">Economía</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Profesor</label>
+                            <select id="profesor" required>
+                                <option value="">Seleccione un profesor</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="fecha" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="estado" required>
+                                <option value="presente">Presente</option>
+                                <option value="ausente">Ausente</option>
+                                <option value="tardanza">Tardanza</option>
+                                <option value="justificado">Justificado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Hora de Entrada</label>
+                            <input type="time" id="horaEntrada">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Hora de Salida</label>
+                            <input type="time" id="horaSalida">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" rows="3" placeholder="Comentarios adicionales..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Registrar Asistencia</button>
+                </form>
+            </div>
+            
+            <!-- TAB: Gestión de Profesores -->
+            <div id="tab-profesores" class="tab-content">
+                <h2>Agregar Nuevo Profesor</h2>
+                <form id="formProfesor">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" id="nombreProfesor" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>DNI</label>
+                            <input type="text" id="dni" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Carrera</label>
+                            <select id="carreraProfesor" required>
+                                <option value="">Seleccione una carrera</option>
+                                <option value="1">Gestión Empresarial</option>
+                                <option value="2">Estadística e Informática</option>
+                                <option value="3">Economía</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="telefono">
+                    </div>
+                    
+                    <button type="submit" class="btn">Agregar Profesor</button>
+                </form>
+                
+                <h2 style="margin-top: 40px;">Lista de Profesores</h2>
+                <div id="listaProfesores"></div>
+            </div>
+            
+            <!-- TAB: Consultar Asistencias -->
+            <div id="tab-consulta" class="tab-content">
+                <h2>Consultar Asistencias</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Fecha Desde</label>
+                        <input type="date" id="fechaDesde">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha Hasta</label>
+                        <input type="date" id="fechaHasta">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="consultarAsistencias()">Buscar</button>
+                
+                <div id="resultadosConsulta"></div>
+            </div>
+            
+            <!-- TAB: Power BI -->
+            <div id="tab-powerbi" class="tab-content">
+                <h2>Exportar Datos para Power BI</h2>
+                <p>Genera archivos CSV para importar en Power BI Desktop (versión gratuita)</p>
+                
+                <div class="export-section">
+                    <h3>Opciones de Exportación</h3>
+                    <div class="export-buttons">
+                        <button class="btn" onclick="exportarCSV('asistencias')">Exportar Asistencias</button>
+                        <button class="btn" onclick="exportarCSV('profesores')">Exportar Profesores</button>
+                        <button class="btn" onclick="exportarCSV('resumen')">Exportar Resumen</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-radius: 8px;">
+                    <h3>📘 Instrucciones para Power BI Desktop (Gratis)</h3>
+                    <ol style="line-height: 2; margin-left: 20px;">
+                        <li>Descarga los archivos CSV usando los botones de arriba</li>
+                        <li>Abre Power BI Desktop (descárgalo gratis de Microsoft)</li>
+                        <li>Haz clic en "Obtener datos" → "Texto/CSV"</li>
+                        <li>Selecciona los archivos CSV descargados</li>
+                        <li>Crea tus visualizaciones arrastrando los campos</li>
+                        <li>Para actualizar datos: vuelve a exportar CSV y refresca en Power BI</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Establecer fecha actual
+        document.getElementById('fecha').valueAsDate = new Date();
+        
+        // Cargar profesores al inicio
+        cargarProfesores();
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (tabName === 'profesores') {
+                listarProfesores();
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = 'alert ' + type;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function cargarProfesores() {
+            const carreraId = document.getElementById('carreraFiltro').value;
+            const url = carreraId ? `api.php?action=listar_profesores&carrera_id=${carreraId}` : 'api.php?action=listar_profesores';
+            
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                const select = document.getElementById('profesor');
+                select.innerHTML = '<option value="">Seleccione un profesor</option>';
+                
+                if (result.success && result.data) {
+                    result.data.forEach(profesor => {
+                        const option = document.createElement('option');
+                        option.value = profesor.id;
+                        option.textContent = profesor.nombre_completo;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        document.getElementById('formAsistencia').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                profesor_id: document.getElementById('profesor').value,
+                fecha: document.getElementById('fecha').value,
+                estado: document.getElementById('estado').value,
+                hora_entrada: document.getElementById('horaEntrada').value,
+                hora_salida: document.getElementById('horaSalida').value,
+                observaciones: document.getElementById('observaciones').value
+            };
+            
+            try {
+                const response = await fetch('api.php?action=registrar_asistencia', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ ' + result.message, 'success');
+                    this.reset();
+                    document.getElementById('fecha').valueAsDate = new Date();
+                } else {
+                    showAlert('✗ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('✗ Error de conexión', 'error');
+            }
+        });
+        
+        document.getElementById('formProfesor').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                nombre: document.getElementById('nombreProfesor').value,
+                dni: document.getElementById('dni').value,
+                carrera_id: document.getElementById('carreraProfesor').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value
+            };
+            
+            try {
+                const response = await fetch('api.php?action=agregar_profesor', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ ' + result.message, 'success');
+                    this.reset();
+                    listarProfesores();
+                    cargarProfesores();
+                } else {
+                    showAlert('✗ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('✗ Error de conexión', 'error');
+            }
+        });
+        
+        async function listarProfesores() {
+            try {
+                const response = await fetch('api.php?action=listar_profesores');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    let html = '<table><thead><tr><th>Nombre</th><th>DNI</th><th>Carrera</th><th>Email</th></tr></thead><tbody>';
+                    result.data.forEach(p => {
+                        html += `<tr>
+                            <td>${p.nombre_completo}</td>
+                            <td>${p.dni}</td>
+                            <td>${p.carrera_nombre}</td>
+                            <td>${p.email || '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('listaProfesores').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function consultarAsistencias() {
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+            
+            let url = 'api.php?action=consultar_asistencias';
+            if (fechaDesde) url += `&fecha_desde=${fechaDesde}`;
+            if (fechaHasta) url += `&fecha_hasta=${fechaHasta}`;
+            
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    let html = '<table><thead><tr><th>Fecha</th><th>Profesor</th><th>Carrera</th><th>Estado</th><th>Entrada</th><th>Salida</th></tr></thead><tbody>';
+                    result.data.forEach(a => {
+                        html += `<tr>
+                            <td>${a.fecha}</td>
+                            <td>${a.nombre_completo}</td>
+                            <td>${a.carrera_nombre}</td>
+                            <td><span class="status-badge status-${a.estado}">${a.estado}</span></td>
+                            <td>${a.hora_entrada || '-'}</td>
+                            <td>${a.hora_salida || '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('resultadosConsulta').innerHTML = html;
+                } else {
+                    document.getElementById('resultadosConsulta').innerHTML = '<p>No se encontraron registros</p>';
+                }
+            } catch (error) {
+                showAlert('✗ Error de conexión', 'error');
+            }
+        }
+        
+        function exportarCSV(tipo) {
+            window.location.href = `api.php?action=exportar_csv&tipo=${tipo}`;
+        }
+    </script>
+</body>
+</html>
